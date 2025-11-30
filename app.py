@@ -1,34 +1,36 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 import requests
 import os
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='.', static_url_path='')
 
-PPLX_API_KEY = os.getenv("PPLX_API_KEY")
-API_URL = "https://api.perplexity.ai/chat/completions"
+API_KEY = os.getenv("PERPLEXITY_API_KEY")
 
 @app.route("/")
 def home():
-    return "Perplexity Chatbot is LIVE 🚀"
+    return send_from_directory('.', 'index.html')   # <-- This loads UI
 
 @app.route("/chat", methods=["POST"])
 def chat():
-    user_message = request.json.get("msg")
+    try:
+        user_input = request.json.get("msg", "")
 
-    headers = {
-        "Authorization": f"Bearer {PPLX_API_KEY}",
-        "Content-Type": "application/json"
-    }
+        payload = {
+            "model": "sonar-small-chat",
+            "messages":[{"role":"user","content":user_input}]
+        }
 
-    payload = {
-    "model": "sonar",      # UPDATED MODEL HERE
-    "messages": [
-        {"role": "user", "content": user_message}
-    ]
-}
+        res = requests.post(
+            "https://api.perplexity.ai/chat/completions",
+            headers={"Authorization": f"Bearer {API_KEY}","Content-Type":"application/json"},
+            json=payload
+        )
 
-    response = requests.post(API_URL, headers=headers, json=payload)
-    return jsonify(response.json())
+        return jsonify(res.json())
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8000)
+    app.run(debug=True, host="0.0.0.0")
