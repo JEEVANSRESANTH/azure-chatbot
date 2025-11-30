@@ -21,9 +21,11 @@ def chat():
     }
 
     payload = {
-        "model": "sonar-small-chat",
-        "messages": [{"role": "user", "content": user_message}]
-    }
+    "model": "sonar",      # UPDATED MODEL HERE
+    "messages": [
+        {"role": "user", "content": user_message}
+    ]
+}
 
     response = requests.post(API_URL, headers=headers, json=payload)
     return jsonify(response.json())
