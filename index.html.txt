@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Jeevan AI Chatbot</title>
+    <style>
+        body {
+            background:#111;
+            color:white;
+            font-family:Arial;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            height:100vh;
+            flex-direction:column;
+        }
+        #chatbox {
+            width:400px;
+            height:450px;
+            background:#222;
+            border-radius:10px;
+            padding:15px;
+            overflow-y:auto;
+        }
+        .msg { margin:8px 0; padding:8px 12px; border-radius:8px; max-width:80%; }
+        .user { background:#0059ff; align-self:flex-end; }
+        .bot { background:#333; align-self:flex-start; }
+        #inputArea {
+            margin-top:15px;
+            width:400px;
+            display:flex;
+        }
+        input {
+            flex:1;
+            padding:10px;
+            border:none;
+            outline:none;
+            border-radius:5px;
+        }
+        button {
+            padding:10px;
+            margin-left:10px;
+            background:#00bfa6;
+            border:none;
+            border-radius:5px;
+            cursor:pointer;
+            font-weight:bold;
+        }
+        button:hover { opacity:.8; }
+    </style>
+</head>
+<body>
+
+    <h2>🔥 Jeevan AI Chatbot 🔥</h2>
+    <div id="chatbox"></div>
+
+    <div id="inputArea">
+        <input id="msgInput" placeholder="Type something...">
+        <button onclick="sendMsg()">Send</button>
+    </div>
+
+<script>
+async function sendMsg(){
+    let msg = document.getElementById("msgInput").value;
+    if(!msg) return;
+
+    let box = document.getElementById("chatbox");
+    box.innerHTML += `<div class="msg user">${msg}</div>`;
+    document.getElementById("msgInput").value = "";
+
+    let response = await fetch("/chat", {
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body:JSON.stringify({msg: msg})
+    });
+    let data = await response.json();
+
+    box.innerHTML += `<div class="msg bot">${data.choices?.[0]?.message?.content || JSON.stringify(data)}</div>`;
+    box.scrollTop = box.scrollHeight;
+}
+</script>
+
+</body>
+</html>
